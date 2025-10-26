@@ -1,0 +1,64 @@
+\documentclass[11pt,fleqn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{algpseudocode}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage{datetime}
+\usepackage{bookmark}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{calc}
+\usepackage{etoolbox}
+
+\newcommand{\doubleR}{\mathbb{R}}
+\newcommand{\doubleC}{\mathbb{C}}
+\newcommand{\doubleZ}{\mathbb{Z}}
+\newcommand{\doubleQ}{\mathbb{Q}}
+\newcommand{\doubleN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\bigO}{\ensuremath{\mathcal{O}}}
+
+% Set \section titles to use small caps automatically
+\titleformat{\section}{\Large\scshape\bfseries}{\thesection}{1em}{}
+% absolute value macro
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\sinc}{\text{sinc}}
+
+\fancyhf{} % sets both header and footer to nothing
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{Page \thepage}
+\pagenumbering{arabic}
+
+\begin{document}
+
+\begin{titlepage}
+	\title{\textbf{My \LaTeX \, Template}}
+	\author{Haozhe Li}
+	\date{
+		Total Pages: \pageref{LastPage}\\[2ex]
+		\today}
+	\maketitle
+	\setcounter{page}{0}
+	\thispagestyle{empty}
+\end{titlepage}
+\pagebreak \newpage
+\clearpage
+\newpage
+\pagestyle{fancy}
+\newpage
+\pagestyle{fancy}
+% ------------------
+
+\end{document}
