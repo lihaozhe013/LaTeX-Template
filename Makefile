@@ -1,55 +1,45 @@
 # ===============================================
-# Dockerized LaTeX Compilation Workflow
+# Docker Compose-based LaTeX Workflow
 # Author: Haozhe Li
 # ===============================================
 
 # ----------------- Configuration -----------------
-DOCKER_IMAGE = registry.gitlab.com/islandoftex/images/texlive:latest
-CONTAINER_NAME = latex_compiler_session
+COMPOSE = docker compose
+SERVICE = latex
 TARGET_FILE = main
-WORKDIR_IN_CONTAINER = /workdir
-LOCAL_PWD = ${PWD}
+TEMP_FILES_SUFFIX := bak0
 
 default: compile
 # ----------------- Container Management -----------------
 start:
-	@echo "--- 1. Starting Docker container: $(CONTAINER_NAME) ---"
-	# Run in the background using -d (detach), mount the current directory using -v, The container will start and enter a dormant state (tail -f /dev/null), ready to receive subsequent commands
-	docker run -d \
-		--name $(CONTAINER_NAME) \
-		-v $(LOCAL_PWD):$(WORKDIR_IN_CONTAINER) \
-		-w $(WORKDIR_IN_CONTAINER) \
-		$(DOCKER_IMAGE) tail -f /dev/null
-	@echo "Container $(CONTAINER_NAME) is running and mounted to $(LOCAL_PWD)"
+	$(COMPOSE) up -d $(SERVICE)
 
 stop:
-	@echo "--- 1. Stopping Docker container: $(CONTAINER_NAME) ---"
-	docker stop $(CONTAINER_NAME) || true
-	@echo "Container $(CONTAINER_NAME) has been stopped."
-	@echo "--- 2. Removing Docker container: $(CONTAINER_NAME) ---"
-	docker rm $(CONTAINER_NAME) || true
-	@echo "Container $(CONTAINER_NAME) has been removed."
+	$(COMPOSE) stop
+
+remove:
+	$(COMPOSE) down
 
 # ----------------- Compilation Tasks -----------------
 compile:
-	docker exec $(CONTAINER_NAME) pdflatex $(TARGET_FILE).tex
+	$(COMPOSE) exec $(SERVICE) pdflatex $(TARGET_FILE).tex
 
 all:
 	@echo "--- Compiling $(TARGET_FILE).tex using pdflatex ---"
 	# First compilation (generating .aux, .toc, and other files)
-	docker exec $(CONTAINER_NAME) pdflatex $(TARGET_FILE).tex
+	$(COMPOSE) exec $(SERVICE) pdflatex $(TARGET_FILE).tex
 	# (If using Biber or BibTeX, insert the corresponding exec command here)
-	# docker exec $(CONTAINER_NAME) biber $(TARGET_FILE)
+	# $(COMPOSE) exec $(SERVICE) biber $(TARGET_FILE)
 	# Second Compilation (Handling References and Directories)
-	docker exec $(CONTAINER_NAME) pdflatex $(TARGET_FILE).tex
+	$(COMPOSE) exec $(SERVICE) pdflatex $(TARGET_FILE).tex
 	# Third compilation (ensuring all cross-references are correct; if using BibTeX, also requires)
-	docker exec $(CONTAINER_NAME) pdflatex $(TARGET_FILE).tex
+	$(COMPOSE) exec $(SERVICE) pdflatex $(TARGET_FILE).tex
 	@echo "--- Compilation complete: $(TARGET_FILE).pdf generated ---"
 
 xelatex:
 	@echo "--- 3. Compiling $(TARGET_FILE).tex using xelatex ---"
-	docker exec $(CONTAINER_NAME) xelatex $(TARGET_FILE).tex
-	docker exec $(CONTAINER_NAME) xelatex $(TARGET_FILE).tex
+	$(COMPOSE) exec $(SERVICE) xelatex $(TARGET_FILE).tex
+	$(COMPOSE) exec $(SERVICE) xelatex $(TARGET_FILE).tex
 	@echo "--- XeLaTeX compilation complete: $(TARGET_FILE).pdf generated ---"
 
 # ----------------- Cleanup -----------------
@@ -73,6 +63,7 @@ clean:
 		$(TARGET_FILE).ilg \
 		$(TARGET_FILE).ind
 	rm -f $(TARGET_FILE).pdf
+	find . -regextype posix-extended -regex '.*\.'$(TEMP_FILES_SUFFIX)'$$' -delete
 	@echo "Cleanup finished."
 
 quick: start compile stop
@@ -80,13 +71,14 @@ quick: start compile stop
 # ----------------- Formatting -----------------
 format:
 	@echo "--- 5. Formatting all .tex files with latexindent ---"
-	@echo "Note: This runs inside container $(CONTAINER_NAME) as host user."
-	docker exec -u "$(shell id -u):$(shell id -g)" $(CONTAINER_NAME) sh -lc '\
+	@echo "Note: This runs inside compose service $(SERVICE) as host user."
+	$(COMPOSE) exec -u "$(shell id -u):$(shell id -g)" $(SERVICE) sh -lc '\
 		set -e; \
-		cd $(WORKDIR_IN_CONTAINER); \
+		cd /workdir; \
 		echo "Finding and formatting all .tex files..."; \
-		find . -type f -name "*.tex" -exec latexindent -n -w -b=0 {} +; \
+		find . -type f -name "*.tex" -exec latexindent -w {} +; \
+		find . -regextype posix-extended -regex ".*\.$(TEMP_FILES_SUFFIX)$$" -delete; \
 		echo "All .tex files formatted." \
 	'
 
-.PHONY: all compile clean start stop quick xelatex cleanup_and_stop format
+.PHONY: all compile clean start stop quick xelatex format
