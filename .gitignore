@@ -5,3 +5,5 @@ main.pdf
 main.out
 main.toc
 main.synctex.gz
+pandoc/main.tex
+pandoc/main_fixed.tex
