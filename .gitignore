@@ -5,7 +5,12 @@
 /main.out
 /main.toc
 /main.synctex.gz
-/pandoc/main.tex
-/pandoc/main_fixed.tex
 /main.tex
+/main.run.xml
+/main.bcf
 /src/
+/scripts/content.md
+/scripts/content.tex
+/scripts/content_fixed.tex
+/scripts/content_fixed_no_format.tex
+/scripts/content_fixed_full.tex
