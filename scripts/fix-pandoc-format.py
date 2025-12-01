@@ -84,7 +84,7 @@ def remove_extra_newlines_around_display_math(filepath):
     except Exception as e:
         print(f"An error occurred during processing: {e}")
 
-file_to_process = 'main.tex' 
+file_to_process = 'content.tex' 
 
 # Run the function
 remove_extra_newlines_around_display_math(file_to_process)
